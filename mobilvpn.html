@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobil_VPN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f0f11;
+            --card-bg: #1c1c1e;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --gold-main: #FFD700;
+            --gold-dark: #D4AF37;
+            --gold-glow: rgba(255, 215, 0, 0.5);
+            --border-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* --- Заголовок сайта (Медленное переливание) --- */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        .brand-header h1 {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            
+            /* Градиент из нужных цветов: Зеленый, Красный, Голубой, Фиолетовый */
+            background: linear-gradient(90deg, #39FF14, #FF3131, #00FFFF, #B026FF, #39FF14);
+            background-size: 300% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+
+            /* Медленная анимация (8 секунд) + пульсирующее свечение */
+            animation: slowFlow 8s linear infinite, pulseGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes slowFlow {
+            0% { background-position: 0% center; }
+            100% { background-position: 100% center; }
+        }
+
+        @keyframes pulseGlow {
+            from {
+                filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+            }
+            to {
+                filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- Верхняя карточка (Статус) --- */
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .vpn-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(180deg, #ff9a44 0%, var(--gold-main) 50%, #b8860b 100%);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #000;
+            font-weight: 700;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+        
+        .vpn-icon::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+            transform: scaleX(1.5);
+        }
+
+        .vpn-icon span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .vpn-icon .infinity {
+            font-size: 24px;
+            line-height: 1;
+        }
+        .vpn-icon .vpn-text {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .status-text h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .status-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .status-text p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Прогресс-бар */
+        .progress-container {
+            position: relative;
+            padding-bottom: 24px;
+        }
+
+        .progress-line {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #555 0%, var(--gold-main) 100%);
+            border-radius: 2px;
+            z-index: 1;
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .progress-dot {
+            width: 16px;
+            height: 16px;
+            background: var(--card-bg);
+            border: 3px solid var(--gold-main);
+            border-radius: 50%;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translate(50%, -50%);
+            z-index: 2;
+            box-shadow: 0 0 12px var(--gold-glow), inset 0 0 5px var(--gold-glow);
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* --- Нижняя карточка (Подключение) --- */
+        .connection-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .connection-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .connection-header span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Вкладки устройств */
+        .device-tabs {
+            display: flex;
+            justify-content: space-between;
+            background: #141416;
+            border-radius: 14px;
+            padding: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #2a2a2c;
+        }
+
+        .tab {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+            color: var(--text-muted);
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #2a2a2c;
+            color: var(--gold-main);
+            text-shadow: 0 0 8px var(--gold-glow);
+        }
+
+        .tab span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Выбранное приложение */
+        .app-selector {
+            border: 1.5px solid var(--gold-main);
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.05) 0%, transparent 100%);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-selector i {
+            font-size: 24px;
+            color: var(--gold-main);
+            text-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .app-info h4 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .app-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* --- Блок с кнопками --- */
+        .action-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .action-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .action-section p {
+            font-size: 13px;
+            color: #d49b5b;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #FFD700 0%, #D4AF37 100%);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-primary:hover, .btn-primary:active {
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid #444;
+        }
+
+        .btn-secondary:hover, .btn-secondary:active {
+            background: #2a2a2c;
+        }
+
+        /* --- Модальное окно для перенаправления --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: #1c1c1e;
+            padding: 24px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 340px;
+            text-align: center;
+            border: 1px solid var(--gold-main);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal h3 {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .modal p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .modal .spinner {
+            font-size: 30px;
+            color: var(--gold-main);
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Скрываем элементы для других ОС */
+        .os-content:not(.active) {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- Заголовок с медленным переливанием -->
+    <div class="brand-header">
+        <h1>Mobil_VPN</h1>
+    </div>
+
+    <!-- Карточка статуса -->
+    <div class="card">
+        <div class="status-header">
+            <div class="vpn-icon">
+                <span class="infinity">∞</span>
+                <span class="vpn-text">VPN</span>
+            </div>
+            <div class="status-text">
+                <h3>Действует до</h3>
+                <h1>Бессрочно</h1>
+                <p>Без ограничения срока</p>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-line">
+                <div style="width:1px; height:8px; background:#555; position:absolute; left:25%; top:-2px; z-index:1;"></div>
+                <div style="width:1px; height:8px; background:#555; position:absolute; left:50%; top:-2px; z-index:1;"></div>
+                <div style="width:1px; height:8px; background:#555; position:absolute; left:75%; top:-2px; z-index:1;"></div>
+                
+                <div class="progress-dot"></div>
+            </div>
+            <div class="progress-labels">
+                <span>нояб</span>
+                <span>февр</span>
+                <span>май</span>
+                <span>авг</span>
+                <span>нояб</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточка подключения -->
+    <div class="card">
+        <div class="connection-header">
+            <h2>Подключение</h2>
+            <span id="os-detected-text">определили автоматически</span>
+        </div>
+
+        <div class="device-tabs">
+            <div class="tab" onclick="switchOS('ios', this)"><i class="fa-brands fa-apple"></i></div>
+            <div class="tab active" onclick="switchOS('android', this)">
+                <i class="fa-brands fa-android"></i> 
+                <span>Android</span>
+            </div>
+            <div class="tab" onclick="switchOS('windows', this)"><i class="fa-brands fa-windows"></i></div>
+            <div class="tab" onclick="switchOS('ios', this)"><i class="fa-brands fa-app-store-ios"></i></div>
+            <div class="tab" onclick="switchOS('tv', this)"><i class="fa-solid fa-tv"></i></div>
+            <div class="tab" onclick="switchOS('mobile', this)"><i class="fa-solid fa-mobile-screen"></i></div>
+        </div>
+
+        <!-- Блок для Android / iOS -->
+        <div id="content-mobile" class="os-content active">
+            <div class="app-selector">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div class="app-info">
+                    <h4>Happ</h4>
+                    <p>выбрано</p>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <h3>Другое устройство</h3>
+                <p>Нажмите кнопку ниже, чтобы автоматически добавить подписку в приложение Happ. Все данные защищены.</p>
+                
+                <!-- Кнопка с зашифрованной ссылкой -->
+                <a href="happ://crypt5/fzvd1RqO41d3WlXhczqNaNOY14FvbD4EX4SuaB8BIvIl4lRu+yfMUC4gnZ7EKcXLwoxBDh1TLPnM9pnrg+tAmPOOPjXVouKWzgpKB+SaCKVp32cPjkXtZwcqWrk3OmUqB+02dPVUtleZ3tc7wUQJ0CIc2ZePvhB/QazUq3BwnOh3DjDy6AnWXsS9Fjo+AhJ8nIl0XHkWZtSRtfQ6Sq33ibBOfBgkNah+h2PB3L6X4Ly9uTkZ5fqvxaIMogczkk1G36GJ6CdLzhJulUL3MlQJkXB+QPa2UVAo4KDC0wqyv8mHU3EWr7svT1/W3hG6mwm4TkUOpyznXyAi7AWNt2X2tBFAbIqq75TMdL1+4E9CwjyeuwcCfF+cHpKJP7HU2ntNbJCsNz3r1YrGrxi/uIr2kDzWLNrov7zNIyT534M5LctWDgvA5U/zydkJHNAnBSEczClx7lUvNZXMFKXSO8Hwn5OuT/A/gKW/TZ2b9LYrbItonL5k10AftSIVWVmhYFBQUoalVdJBcnyz8rSNc28tC1noj/IG6SKK8kfy7vj/B3Hj+th3GyWchdGceNIvQVqBXXyU+Igwtr6yMlx9DlH0aJc8t+oGM6Bdr5Ih8g0BdAg//FzG+udwkuBjBPF/XKTwFqpiz3vv4WTxiSPLh2JJexZK60rbvTq1ShpBGDjedvx2Kzpcw2wC1Cjm/Z8P2utC46B9IQIh/N622o8dnbzSCvtIoCifS+oCIgpAVl3PppVeY6ryz3Zb2AnPL53T+5Cqs7iLGaX52ilopubkia5fo0PQWc3l//4qRfelXl6fABWqPLSzhj15MA7ePJCDgBrhHKnLEM1PAGb7EamSWVi6T3tEfog=ff" 
+                   class="btn btn-primary" onclick="showRedirectModal(event)">
+                    <i class="fa-solid fa-bolt"></i> Подключить в Happ
+                </a>
+                
+                <!-- Замените ссылку ниже на ваш реальный сайт -->
+                <a href="https://ваш-сайт.com" target="_blank" class="btn btn-secondary">
+                    <i class="fa-solid fa-circle-info"></i> Инструкция на сайте
+                </a>
+            </div>
+        </div>
+
+        <!-- Заглушка для ПК и ТВ -->
+        <div id="content-desktop" class="os-content" style="text-align: center; padding: 20px 0;">
+            <i class="fa-solid fa-desktop" style="font-size: 40px; color: #555; margin-bottom: 15px;"></i>
+            <h3 style="margin-bottom: 10px;">Подключение для ПК</h3>
+            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">Откройте ссылку на вашем компьютере или скачайте файл конфигурации.</p>
+            
+            <!-- Замените ссылку ниже на ваш реальный сайт или прямую ссылку -->
+            <a href="https://ваш-сайт.com" target="_blank" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-download"></i> Перейти к загрузке
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<!-- Модальное окно ожидания -->
+<div class="modal-overlay" id="redirectModal">
+    <div class="modal">
+        <i class="fa-solid fa-circle-notch spinner"></i>
+        <h3>Открываем Happ...</h3>
+        <p>Если приложение не открылось автоматически, вернитесь на эту страницу и попробуйте снова.</p>
+        <button class="btn btn-secondary" onclick="closeRedirectModal()" style="width: 100%;">Закрыть</button>
+    </div>
+</div>
+
+<script>
+    // --- Логика вкладок и определения ОС ---
+    function switchOS(os, element) {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(t => {
+            t.classList.remove('active');
+            const span = t.querySelector('span');
+            if(span) span.remove();
+        });
+        
+        element.classList.add('active');
+        
+        if (os === 'android' || os === 'mobile') {
+            element.innerHTML = '<i class="fa-brands fa-android"></i> <span>Android</span>';
+        } else if (os === 'ios') {
+            element.innerHTML = '<i class="fa-brands fa-apple"></i> <span>iOS</span>';
+        } else if (os === 'windows') {
+            element.innerHTML = '<i class="fa-brands fa-windows"></i> <span>Windows</span>';
+        }
+
+        const mobileContent = document.getElementById('content-mobile');
+        const desktopContent = document.getElementById('content-desktop');
+        const osText = document.getElementById('os-detected-text');
+
+        if (os === 'android' || os === 'ios' || os === 'mobile') {
+            mobileContent.classList.add('active');
+            desktopContent.classList.remove('active');
+            osText.innerText = "определили автоматически";
+        } else {
+            mobileContent.classList.remove('active');
+            desktopContent.classList.add('active');
+            osText.innerText = "ПК / Другое";
+        }
+    }
+
+    // Автоопределение ОС при загрузке
+    window.onload = function() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        
+        if (/android/i.test(userAgent)) {
+            // Android активен по умолчанию
+        } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            const iosTab = document.querySelectorAll('.tab')[3]; 
+            switchOS('ios', iosTab);
+        } else {
+            const winTab = document.querySelectorAll('.tab')[2]; 
+            switchOS('windows', winTab);
+        }
+    };
+
+    // --- Логика модального окна при клике на Happ ---
+    function showRedirectModal(e) {
+        const modal = document.getElementById('redirectModal');
+        modal.classList.add('show');
+    }
+
+    function closeRedirectModal() {
+        const modal = document.getElementById('redirectModal');
+        modal.classList.remove('show');
+    }
+</script>
+
+</body>
+</html>
